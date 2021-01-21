@@ -2,8 +2,9 @@
 boiler plate code for modules
 """
 import numpy as np
-import numba
+from numba import jit_module
 import random
+
 
 
 def compute_average(*args):
@@ -28,12 +29,12 @@ def init_grid(size):
     """
     initialize the diamond square grid
     """
-    
-    grid = np.zeros([size, size])
+    i = int(size)
+    grid = np.zeros([i, i])
     grid[0,0] = random_generator()
-    grid[(size-1), 0] = random_generator()
-    grid[(0,(size-1) )] = random_generator()
-    grid[((size-1), (size-1))] = random_generator()
+    grid[(i-1), 0] = random_generator()
+    grid[(0,(i-1) )] = random_generator()
+    grid[((i-1), (i-1))] = random_generator()
     
     return grid
 
@@ -110,8 +111,6 @@ def quadtree_diamond_square_algorithm(grid, nw_position, current_length):
     if  ((current_length % 2) == 0):
         nw_point, ne_point, sw_point, se_point = find_square_step_neighbours(nw_position, current_length)
         midpoint[0], midpoint[1] = calculate_midpoint(nw_point, ne_point, sw_point, se_point)
-        print(nw_point)
-        print(midpoint)
         calculate_squarestep_value(grid, midpoint, nw_point, ne_point, sw_point, se_point)
         current_length = current_length / 2
         nw_position, ne_position, sw_position, se_position = recalculate_positions(midpoint, current_length)
@@ -122,24 +121,4 @@ def quadtree_diamond_square_algorithm(grid, nw_position, current_length):
         quadtree_diamond_square_algorithm(grid, se_position, current_length)
     return
 
-def main():
-    """
-    main procedure
-    """
-    
-    size = 2
-    last_position = [(2**size + 1), (2**size + 1)]
-    first_position = [1,1]
-    length = last_position[0] - first_position[0]
-    current_length = length
-    
-    grid = init_grid(last_position[0])
-    print(grid)
-    
-    quadtree_diamond_square_algorithm(grid, first_position, current_length)
-    print(grid)
-     
-if __name__ == "__main__":        
-    main()
-
-        
+#jit_module(nopython=True)
