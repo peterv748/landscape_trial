@@ -1,6 +1,7 @@
 """
 boiler plate code for modules
 """
+from math import fsum
 import numpy as np
 from numba import jit_module
 import random
@@ -11,8 +12,9 @@ def compute_average(*args):
     """
     compute the float average of input arguments
     """
-    
-    return float((sum(args))/len(args))
+    arg_sum = float(fsum(args))
+    number_args = int(len(args))
+    return float(arg_sum/number_args)
 
 
 def random_generator():
@@ -25,18 +27,18 @@ def random_generator():
     
     return random.gauss(mu, sigma)
 
-def init_grid(size):
+def init_grid(grid, size):
     """
     initialize the diamond square grid
     """
     i = int(size)
-    grid = np.zeros([i, i])
+    
     grid[0,0] = random_generator()
     grid[(i-1), 0] = random_generator()
     grid[(0,(i-1) )] = random_generator()
     grid[((i-1), (i-1))] = random_generator()
     
-    return grid
+    return
 
 def find_square_step_neighbours(nw_position, current_length):
     """
@@ -55,6 +57,22 @@ def find_square_step_neighbours(nw_position, current_length):
         sw_neighbour, \
         se_neighbour
 
+def find_diamond_step_neighbours(midpoint, current_length):
+    """
+    find the upper (N), right (E)
+    left (W), right (E) neighbours
+    for the diamond_step part of the algorithm
+    """
+    distance = int(current_length / 2)
+    north_neighbour = [(midpoint[0] -distance), midpoint[1]]
+    west_neighbour = [midpoint[0], (midpoint[1] - distance)]
+    south_neighbour = [(midpoint[0] + distance), midpoint[1]] 
+    east_neighbour = [midpoint[0], (midpoint[1] + distance)]
+   
+    return  north_neighbour, \
+	    west_neighbour, \
+        south_neighbour, \
+        east_neighbour
 
 def calculate_midpoint(nw_point, ne_point, sw_point, se_point):
     """
@@ -99,6 +117,29 @@ def calculate_squarestep_value(grid, midpoint, upper_left,  upper_right, lower_l
     j = int(midpoint[1] - 1)
     grid[i, j] = new_value
     
+    return
+
+def calculate_diamondstep_value(grid, midpoint, upper_left,  upper_right, lower_left, lower_right):
+    """
+    calculate the new value for the midpoint in the square step
+    """ 
+    i = int(upper_left[0] - 1)
+    j = int(upper_left[1] - 1)
+    nw_value = grid[i,j]
+    i = int(upper_right[0]-1)
+    j = int(upper_right[1] -1)
+    ne_value = grid[i,j]
+    i = int(lower_left[0]-1)
+    j = int(lower_left[1] -1)
+    sw_value = grid[i,j]
+    i = int(lower_right[0]-1)
+    j = int(lower_right[1] -1)
+    se_value = grid[i,j]
+    new_value = compute_average(nw_value, ne_value, sw_value, se_value) + random_generator()
+    i = int(midpoint[0] - 1)
+    j = int(midpoint[1] - 1)
+    grid[i, j] = new_value
+    
     return 
 
 def quadtree_diamond_square_algorithm(grid, nw_position, current_length):
@@ -112,6 +153,7 @@ def quadtree_diamond_square_algorithm(grid, nw_position, current_length):
         nw_point, ne_point, sw_point, se_point = find_square_step_neighbours(nw_position, current_length)
         midpoint[0], midpoint[1] = calculate_midpoint(nw_point, ne_point, sw_point, se_point)
         calculate_squarestep_value(grid, midpoint, nw_point, ne_point, sw_point, se_point)
+        north, west, south, east = find_diamond_step_neighbours(midpoint, current_length)
         current_length = current_length / 2
         nw_position, ne_position, sw_position, se_position = recalculate_positions(midpoint, current_length)
 
