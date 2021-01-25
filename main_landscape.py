@@ -13,20 +13,20 @@ def main():
     main procedure
     """
 
-    size = 10
+    size = 7
     last_position = [(2**size + 1), (2**size + 1)]
     first_position = [1,1]
     length = last_position[0] - first_position[0]
     current_length = length
-    current_random_seed = 10
-    grid = landscape.init_grid(int(last_position[0]), current_random_seed)
+
+    grid = landscape.init_grid(int(last_position[0]))
     start = time.time()
-    landscape.quadtree_diamond_square_algorithm(grid, first_position, current_length, current_random_seed)
+    landscape.quadtree_diamond_square_algorithm(grid, first_position, current_length)
     time_elapsed = time.time() - start
 
     print(grid)
-    graph_type = "2D"
-    draw_landscape.plot_landscape(grid, time_elapsed, graph_type)
+
+    draw_landscape.plot_landscape(grid, time_elapsed)
 
 if __name__ == "__main__":
     main()

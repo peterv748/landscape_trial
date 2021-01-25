@@ -5,53 +5,60 @@ import numpy as np
 from numba import jit_module
 import random
 
+
+
 def compute_average(*args):
     """
     compute the float average of input arguments
     """
+
     return float((sum(args))/len(args))
 
 
-def random_generator(seed):
+def random_generator():
     """
     randon generator to use in diamond square algorithm
     """
-    return random.randint(-seed, seed)
 
-def init_grid(size, random_seed):
+    mu = 0.5
+    sigma = 0.25
+
+    return random.gauss(mu, sigma)
+
+def init_grid(size):
     """
     initialize the diamond square grid
     """
     i = int(size)
     grid = np.zeros([i, i])
-    grid[0,0] = random_generator(random_seed)
-    grid[(i-1), 0] = random_generator(random_seed)
-    grid[(0,(i-1) )] = random_generator(random_seed)
-    grid[((i-1), (i-1))] = random_generator(random_seed)
+    grid[0,0] = random_generator()
+    grid[(i-1), 0] = random_generator()
+    grid[(0,(i-1) )] = random_generator()
+    grid[((i-1), (i-1))] = random_generator()
 
     return grid
 
-def find_square_step_neighbors(nw_position, current_length):
+def find_square_step_neighbours(nw_position, current_length):
     """
     find the upper_left (NW), upper_right (NE)
-    lower_left (SW), lower_right (SE) neighbors
+    lower_left (SW), lower_right (SE) neighbours
     for the square_step part of the algorithm
     """
 
-    nw_neighbor = [nw_position[0], nw_position[1]]
-    ne_neighbor = [nw_position[0], (nw_position[1] + current_length)]
-    sw_neighbor = [(nw_position[0] + current_length), nw_position[1]]
-    se_neighbor = [(nw_position[0] + current_length), (nw_position[1] + current_length)]
+    nw_neighbour = [nw_position[0], nw_position[1]]
+    ne_neighbour = [nw_position[0], (nw_position[1] + current_length)]
+    sw_neighbour = [(nw_position[0] + current_length), nw_position[1]]
+    se_neighbour = [(nw_position[0] + current_length), (nw_position[1] + current_length)]
 
-    return nw_neighbor, \
-	    ne_neighbor, \
-        sw_neighbor, \
-        se_neighbor
+    return nw_neighbour, \
+	    ne_neighbour, \
+        sw_neighbour, \
+        se_neighbour
 
 def find_north_west_south_east_points(grid, midpoint, distance):
     """
     find the upper_left (NW), upper_right (NE)
-    lower_left (SW), lower_right (SE) neighbors
+    lower_left (SW), lower_right (SE) neighbours
     for the square_step part of the algorithm
     """
     def point_is_on_top_or_bottom_edge(grid, point):
@@ -110,19 +117,19 @@ def recalculate_positions(midpoint, current_length):
     return nw_position, ne_position, sw_position, se_position
 
 
-def calculate_squarestep_value(grid, midpoint, upper_left,  upper_right, lower_left, lower_right, current_random_seed):
+def calculate_squarestep_value(grid, midpoint, upper_left,  upper_right, lower_left, lower_right):
     """
     calculate the new value for the midpoint in the square step
     """
     new_value = 0.0
-    for point in [upper_left, upper_right, lower_left, lower_right]:
+    for point in [upper_left, upper_right, lower_left, lower_left]:
         new_value = new_value + grid[(point[0]-1), (point[1]-1)]
 
-    grid[(midpoint[0]-1), (midpoint[1]-1)] = (new_value / 4) + random_generator(current_random_seed)
+    grid[(midpoint[0]-1), (midpoint[1]-1)] = (new_value / 4) + random_generator()
 
     return
 
-def calculate_diamondstep_values(grid, north, west, south, east, distance, current_random_seed):
+def calculate_diamondstep_values(grid, north, west, south, east, distance):
     """
     calculate the new value for the diamond points step
     """
@@ -131,7 +138,7 @@ def calculate_diamondstep_values(grid, north, west, south, east, distance, curre
         """
         average_value = compute_average(grid[(point1[0]-1), (point1[1]-1)], grid[(point2[0]-1), (point2[1]-1)], \
                                 grid[(point3[0]-1), (point3[1]-1)], grid[(point4[0]-1), (point4[1]-1)]) 
-        average_value = average_value + random_generator(current_random_seed)
+        average_value = average_value + random_generator()
         return float(average_value)
 
     for point in [north, west, south, east]:
@@ -141,7 +148,7 @@ def calculate_diamondstep_values(grid, north, west, south, east, distance, curre
 
     return
 
-def quadtree_diamond_square_algorithm(grid, nw_position, current_length, current_random_seed):
+def quadtree_diamond_square_algorithm(grid, nw_position, current_length):
     """
     in this recursive procedure the heavy lifting of calculating the square step and
     diamond step is executed, using a quadtree approach
@@ -149,20 +156,20 @@ def quadtree_diamond_square_algorithm(grid, nw_position, current_length, current
     midpoint = [0,0]
 
     if  ((current_length % 2) == 0):
-        nw_point, ne_point, sw_point, se_point = find_square_step_neighbors(nw_position, current_length)
+        nw_point, ne_point, sw_point, se_point = find_square_step_neighbours(nw_position, current_length)
         new_length = int(current_length / 2)
         midpoint[0], midpoint[1] = calculate_midpoint(nw_point, new_length)
-        calculate_squarestep_value(grid, midpoint, nw_point, ne_point, sw_point, se_point, current_random_seed)
+        calculate_squarestep_value(grid, midpoint, nw_point, ne_point, sw_point, se_point)
         north, west, south, east = find_north_west_south_east_points(grid, midpoint, new_length)
-        calculate_diamondstep_values(grid, north, west, south, east, new_length, current_random_seed)
+        calculate_diamondstep_values(grid, north, west, south, east, new_length)
 
 
         nw_position, ne_position, sw_position, se_position = recalculate_positions(midpoint, new_length)
-        current_random_seed = current_random_seed - 1
-        quadtree_diamond_square_algorithm(grid, nw_position, new_length, current_random_seed)
-        quadtree_diamond_square_algorithm(grid, ne_position, new_length, current_random_seed)
-        quadtree_diamond_square_algorithm(grid, sw_position, new_length, current_random_seed)
-        quadtree_diamond_square_algorithm(grid, se_position, new_length, current_random_seed)
+
+        quadtree_diamond_square_algorithm(grid, nw_position, new_length)
+        quadtree_diamond_square_algorithm(grid, ne_position, new_length)
+        quadtree_diamond_square_algorithm(grid, sw_position, new_length)
+        quadtree_diamond_square_algorithm(grid, se_position, new_length)
     return
 
 #jit_module(nopython=True)
