@@ -20,8 +20,8 @@ def random_generator():
     randon generator to use in diamond square algorithm
     """
 
-    mu = 0.5
-    sigma = 0.25
+    mu = 5.0
+    sigma = 2.5
 
     return random.gauss(mu, sigma)
 
@@ -38,27 +38,27 @@ def init_grid(size):
 
     return grid
 
-def find_square_step_neighbours(nw_position, current_length):
+def find_square_step_neighbors(nw_position, current_length):
     """
     find the upper_left (NW), upper_right (NE)
-    lower_left (SW), lower_right (SE) neighbours
+    lower_left (SW), lower_right (SE) neighbors
     for the square_step part of the algorithm
     """
 
-    nw_neighbour = [nw_position[0], nw_position[1]]
-    ne_neighbour = [nw_position[0], (nw_position[1] + current_length)]
-    sw_neighbour = [(nw_position[0] + current_length), nw_position[1]]
-    se_neighbour = [(nw_position[0] + current_length), (nw_position[1] + current_length)]
+    nw_neighbor = [nw_position[0], nw_position[1]]
+    ne_neighbor = [nw_position[0], (nw_position[1] + current_length)]
+    sw_neighbor = [(nw_position[0] + current_length), nw_position[1]]
+    se_neighbor = [(nw_position[0] + current_length), (nw_position[1] + current_length)]
 
-    return nw_neighbour, \
-	    ne_neighbour, \
-        sw_neighbour, \
-        se_neighbour
+    return nw_neighbor, \
+	    ne_neighbor, \
+        sw_neighbor, \
+        se_neighbor
 
 def find_north_west_south_east_points(grid, midpoint, distance):
     """
     find the upper_left (NW), upper_right (NE)
-    lower_left (SW), lower_right (SE) neighbours
+    lower_left (SW), lower_right (SE) neighbors
     for the square_step part of the algorithm
     """
     def point_is_on_top_or_bottom_edge(grid, point):
@@ -156,7 +156,7 @@ def quadtree_diamond_square_algorithm(grid, nw_position, current_length):
     midpoint = [0,0]
 
     if  ((current_length % 2) == 0):
-        nw_point, ne_point, sw_point, se_point = find_square_step_neighbours(nw_position, current_length)
+        nw_point, ne_point, sw_point, se_point = find_square_step_neighbors(nw_position, current_length)
         new_length = int(current_length / 2)
         midpoint[0], midpoint[1] = calculate_midpoint(nw_point, new_length)
         calculate_squarestep_value(grid, midpoint, nw_point, ne_point, sw_point, se_point)
